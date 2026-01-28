@@ -1,28 +1,26 @@
 'use client'
 
-import Link from 'next/link'
 import { Header } from '@/components/layout'
 import { ReportForm } from '@/components/reports'
 
 export default function ReportsPage() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
-        <div className="mb-8 text-center animate-fade-in">
-          <h1 className="text-3xl font-bold text-slate-100 mb-2">
+      <main className="container max-w-3xl mx-auto px-4 sm:px-6 py-12">
+        <div className="mb-10 text-center space-y-4">
+          <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl">
             Citizen Reporting
           </h1>
-          <p className="text-slate-400">
-            Help us protect Udaipur&apos;s lakes by reporting pollution, algae
-            blooms, or illegal activities.
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            Help us protect Udaipur's lakes by reporting pollution, algae
+            blooms, or illegal activities. Your eyes on the ground make a
+            difference.
           </p>
         </div>
 
-        <div className="card p-6 md:p-8 animate-fade-in stagger-1">
-          <ReportForm />
-        </div>
+        <ReportForm />
       </main>
     </div>
   )

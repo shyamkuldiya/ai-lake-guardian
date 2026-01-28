@@ -30,7 +30,7 @@ export function TrendChart({ data, range }: TrendChartProps) {
   }
 
   return (
-    <div className="w-full h-[300px]">
+    <div className="w-full h-full min-h-[300px]">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart
           data={sortedData}
@@ -43,22 +43,34 @@ export function TrendChart({ data, range }: TrendChartProps) {
         >
           <defs>
             <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#0EA5E9" stopOpacity={0.3} />
-              <stop offset="95%" stopColor="#0EA5E9" stopOpacity={0} />
+              <stop
+                offset="5%"
+                stopColor="hsl(var(--primary))"
+                stopOpacity={0.3}
+              />
+              <stop
+                offset="95%"
+                stopColor="hsl(var(--primary))"
+                stopOpacity={0}
+              />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.5} />
+          <CartesianGrid
+            strokeDasharray="3 3"
+            stroke="hsl(var(--border))"
+            vertical={false}
+          />
           <XAxis
             dataKey="timestamp"
             tickFormatter={formatXAxis}
-            stroke="#94A3B8"
+            stroke="hsl(var(--muted-foreground))"
             fontSize={12}
             tickLine={false}
             axisLine={false}
             minTickGap={30}
           />
           <YAxis
-            stroke="#94A3B8"
+            stroke="hsl(var(--muted-foreground))"
             fontSize={12}
             tickLine={false}
             axisLine={false}
@@ -66,12 +78,18 @@ export function TrendChart({ data, range }: TrendChartProps) {
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: '#1E293B',
-              borderColor: '#475569',
-              borderRadius: '8px',
-              color: '#F8FAFC',
+              backgroundColor: 'hsl(var(--card))',
+              borderColor: 'hsl(var(--border))',
+              borderRadius: 'var(--radius)',
+              color: 'hsl(var(--card-foreground))',
+              boxShadow: 'var(--shadow-sm)',
             }}
-            itemStyle={{ color: '#F8FAFC' }}
+            itemStyle={{ color: 'hsl(var(--primary))' }}
+            cursor={{
+              stroke: 'hsl(var(--muted-foreground))',
+              strokeWidth: 1,
+              strokeDasharray: '4 4',
+            }}
             labelFormatter={(label) => format(new Date(label), 'PPP p')}
             formatter={(value: number | undefined) => [
               value ? `${value}` : 'N/A',
@@ -81,8 +99,8 @@ export function TrendChart({ data, range }: TrendChartProps) {
           <Area
             type="monotone"
             dataKey="score"
-            stroke="#0EA5E9"
-            strokeWidth={3}
+            stroke="hsl(var(--primary))"
+            strokeWidth={2}
             fillOpacity={1}
             fill="url(#colorScore)"
             animationDuration={1500}

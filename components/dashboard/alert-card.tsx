@@ -2,6 +2,8 @@
 
 import type { Alert } from '@/lib/schemas/alert'
 import { ALERT_SEVERITY_CONFIG } from '@/lib/schemas/alert'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 
 interface AlertCardProps {
   alert: Alert
@@ -11,71 +13,51 @@ interface AlertCardProps {
 export function AlertCard({ alert, compact = false }: AlertCardProps) {
   const severityConfig = ALERT_SEVERITY_CONFIG[alert.severity]
 
+  // Map severity to standard colors if we want, or keep using strict config
+  let borderColor = ''
+  let bgColor = ''
+
+  if (alert.severity === 'critical') {
+    borderColor = 'border-red-500/50'
+    bgColor = 'bg-red-500/10'
+  } else if (alert.severity === 'warning') {
+    borderColor = 'border-amber-500/50'
+    bgColor = 'bg-amber-500/10'
+  } else {
+    borderColor = 'border-blue-500/50'
+    bgColor = 'bg-blue-500/10'
+  }
+
   return (
-    <div
-      className={`
-        rounded-lg border animate-slide-in-right
-        ${compact ? 'p-3' : 'p-4'}
-      `}
-      style={{
-        borderColor: `${severityConfig.color}40`,
-        background: severityConfig.bgColor,
-      }}
-    >
-      <div className="flex items-start gap-3">
-        {/* Icon */}
-        <span className="text-lg shrink-0">{severityConfig.icon}</span>
+    <Card className={`border-l-4 ${borderColor} ${bgColor}`}>
+      <CardContent className={compact ? 'p-3' : 'p-4'}>
+        <div className="flex items-start gap-3">
+          <span className="text-xl mt-0.5">{severityConfig.icon}</span>
 
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <h4
-              className="font-medium truncate"
-              style={{ color: severityConfig.color }}
-            >
-              {alert.lakeName || 'Lake'}
-            </h4>
-            <span
-              className="px-1.5 py-0.5 rounded text-xs font-medium"
-              style={{
-                color: severityConfig.color,
-                background: `${severityConfig.color}20`,
-              }}
-            >
-              {severityConfig.label}
-            </span>
-          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <h4 className="font-semibold text-foreground text-sm">
+                {alert.lakeName || 'System Alert'}
+              </h4>
+              <Badge variant="secondary" className="text-xs px-1.5 h-5">
+                {severityConfig.label}
+              </Badge>
+            </div>
 
-          <p className="text-sm text-slate-300 mt-1 line-clamp-2">
-            {alert.title}
-          </p>
+            <p className="text-sm font-medium text-foreground">{alert.title}</p>
 
-          {!compact && alert.description && (
-            <p className="text-sm text-slate-400 mt-2 line-clamp-2">
-              {alert.description}
+            {!compact && alert.description && (
+              <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                {alert.description}
+              </p>
+            )}
+
+            <p className="text-xs text-muted-foreground mt-2">
+              {new Date(alert.createdAt).toLocaleString()}
             </p>
-          )}
-
-          <p className="text-xs text-slate-500 mt-2">
-            {formatTimeAgo(alert.createdAt)}
-          </p>
+          </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   )
-}
-
-function formatTimeAgo(date: Date): string {
-  const now = new Date()
-  const diffMs = now.getTime() - new Date(date).getTime()
-  const diffMins = Math.floor(diffMs / 60000)
-
-  if (diffMins < 1) return 'just now'
-  if (diffMins < 60) return `${diffMins} min ago`
-
-  const diffHours = Math.floor(diffMins / 60)
-  if (diffHours < 24) return `${diffHours} hours ago`
-
-  const diffDays = Math.floor(diffHours / 24)
-  return `${diffDays} days ago`
 }

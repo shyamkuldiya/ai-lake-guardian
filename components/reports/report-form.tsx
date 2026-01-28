@@ -2,7 +2,6 @@
 
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useMutation } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import {
@@ -10,8 +9,13 @@ import {
   type ReportFormData,
   REPORT_TYPE_INFO,
 } from '@/lib/schemas/report'
-import { reportsApi } from '@/lib/api/client' // We'll bypass the hook for now to keep it simple or use the hook
 import { useSubmitReport, useUploadImage } from '@/lib/hooks'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
 
 export function ReportForm() {
   const router = useRouter()
@@ -26,24 +30,18 @@ export function ReportForm() {
   } = useForm<ReportFormData>({
     resolver: zodResolver(ReportFormSchema),
     defaultValues: {
-      lakeId: '550e8400-e29b-41d4-a716-446655440001', // Default to Pichola
+      lakeId: '550e8400-e29b-41d4-a716-446655440001',
       location: { latitude: 24.5764, longitude: 73.6827 },
     },
   })
 
   const submitReport = useSubmitReport()
-  const uploadImage = useUploadImage()
 
   const onSubmit = async (data: ReportFormData) => {
     try {
       let imageUrl = ''
-
-      // Upload image if present
       if (imageFile) {
-        // In a real app, we'd wait for the upload
-        // const result = await uploadImage.mutateAsync(imageFile);
-        // imageUrl = result.url;
-        imageUrl = URL.createObjectURL(imageFile) // Mock for now
+        imageUrl = URL.createObjectURL(imageFile) // Mock
       }
 
       await submitReport.mutateAsync({
@@ -68,141 +66,130 @@ export function ReportForm() {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="space-y-6 max-w-2xl mx-auto"
+      className="space-y-8 max-w-2xl mx-auto"
     >
       {/* Report Type Selection */}
-      <div className="space-y-3">
-        <label className="block text-sm font-medium text-slate-300">
-          What did you observe?
-        </label>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {Object.entries(REPORT_TYPE_INFO).map(([type, info]) => (
-            <label
-              key={type}
-              className={`
-                relative flex items-start p-4 cursor-pointer rounded-lg border transition-all
-                ${
-                  watch('reportType') === type
-                    ? 'border-sky-500 bg-sky-500/10 ring-1 ring-sky-500'
-                    : 'border-slate-700 bg-slate-800/50 hover:border-slate-600'
-                }
-              `}
-            >
-              <input
-                type="radio"
-                value={type}
-                className="sr-only"
-                {...register('reportType')}
-              />
-              <span className="text-2xl mr-3">{info.icon}</span>
-              <div>
-                <span className="block text-sm font-medium text-slate-200">
-                  {info.label}
-                </span>
-                <span className="block text-xs text-slate-400 mt-1">
-                  {info.description}
-                </span>
-              </div>
-            </label>
-          ))}
+      <div className="space-y-4">
+        <Label className="text-base">What did you observe?</Label>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {Object.entries(REPORT_TYPE_INFO).map(([type, info]) => {
+            const isSelected = watch('reportType') === type
+            return (
+              <label
+                key={type}
+                className={cn(
+                  'relative flex items-start p-4 cursor-pointer rounded-xl border-2 transition-all hover:bg-muted/50',
+                  isSelected
+                    ? 'border-primary bg-primary/5 ring-1 ring-primary'
+                    : 'border-muted bg-card'
+                )}
+              >
+                <input
+                  type="radio"
+                  value={type}
+                  className="sr-only"
+                  {...register('reportType')}
+                />
+                <span className="text-2xl mr-3">{info.icon}</span>
+                <div>
+                  <span className="block text-sm font-semibold text-foreground">
+                    {info.label}
+                  </span>
+                  <span className="block text-xs text-muted-foreground mt-1">
+                    {info.description}
+                  </span>
+                </div>
+              </label>
+            )
+          })}
         </div>
         {errors.reportType && (
-          <p className="text-sm text-red-500">{errors.reportType.message}</p>
+          <p className="text-sm text-destructive font-medium">
+            {errors.reportType.message}
+          </p>
         )}
       </div>
 
       {/* Description */}
-      <div className="space-y-1">
-        <label
-          htmlFor="description"
-          className="block text-sm font-medium text-slate-300"
-        >
-          Description
-        </label>
-        <textarea
+      <div className="space-y-2">
+        <Label htmlFor="description">Description</Label>
+        <Textarea
           id="description"
-          rows={4}
-          className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-slate-100 placeholder-slate-500 focus:ring-2 focus:ring-sky-500 focus:outline-none transition-all"
           placeholder="Please describe what you saw, specific location details, or any other relevant information."
+          className="min-h-[120px] resize-y"
           {...register('description')}
         />
         {errors.description && (
-          <p className="text-sm text-red-500">{errors.description.message}</p>
+          <p className="text-sm text-destructive font-medium">
+            {errors.description.message}
+          </p>
         )}
       </div>
 
-      {/* Location (Simplified for MVP - just text or auto-detected in real app) */}
-      <div className="space-y-1">
-        <label
-          htmlFor="location"
-          className="block text-sm font-medium text-slate-300"
-        >
-          Location
-        </label>
+      {/* Location */}
+      <div className="space-y-2">
+        <Label htmlFor="location">Location</Label>
         <div className="flex gap-2">
-          <input
-            type="text"
+          <Input
             readOnly
             value="Current Location (24.5854° N, 73.7125° E)"
-            className="flex-1 bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-slate-400 text-sm"
+            className="bg-muted/50 text-muted-foreground"
           />
-          <button
-            type="button"
-            className="px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm text-slate-200"
-          >
+          <Button type="button" variant="outline">
             📍 Update
-          </button>
+          </Button>
         </div>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-muted-foreground">
           For this prototype, we default to Udaipur center.
         </p>
       </div>
 
       {/* Image Upload */}
-      <div className="space-y-1">
-        <label className="block text-sm font-medium text-slate-300">
-          Evidence (Photo)
-        </label>
-        <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-700 border-dashed rounded-lg hover:border-slate-500 transition-colors">
-          <div className="space-y-1 text-center">
+      <div className="space-y-2">
+        <Label>Evidence (Photo)</Label>
+        <Card className="border-2 border-dashed border-muted-foreground/25 hover:border-primary/50 transition-colors">
+          <CardContent className="flex flex-col items-center justify-center py-10 text-center">
             {preview ? (
-              <div className="relative">
+              <div className="relative w-full max-w-sm">
                 <img
                   src={preview}
                   alt="Preview"
-                  className="mx-auto h-48 object-cover rounded-lg"
+                  className="rounded-lg object-cover shadow-sm w-full h-64"
                 />
-                <button
+                <Button
                   type="button"
+                  variant="destructive"
+                  size="icon"
+                  className="absolute -top-2 -right-2 h-8 w-8 rounded-full shadow-md"
                   onClick={() => {
                     setPreview(null)
                     setImageFile(null)
                   }}
-                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-lg hover:bg-red-600"
                 >
                   ✕
-                </button>
+                </Button>
               </div>
             ) : (
               <>
-                <svg
-                  className="mx-auto h-12 w-12 text-slate-400"
-                  stroke="currentColor"
-                  fill="none"
-                  viewBox="0 0 48 48"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                    strokeWidth={2}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <div className="flex text-sm text-slate-400">
+                <div className="mb-4 rounded-full bg-muted p-4">
+                  <svg
+                    className="h-8 w-8 text-muted-foreground"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                </div>
+                <div className="flex items-center text-sm text-muted-foreground">
                   <label
                     htmlFor="file-upload"
-                    className="relative cursor-pointer rounded-md font-medium text-sky-500 hover:text-sky-400 focus-within:outline-none"
+                    className="relative cursor-pointer rounded-md font-medium text-primary hover:text-primary/90 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2"
                   >
                     <span>Upload a file</span>
                     <input
@@ -216,28 +203,25 @@ export function ReportForm() {
                   </label>
                   <p className="pl-1">or drag and drop</p>
                 </div>
-                <p className="text-xs text-slate-500">
-                  PNG, JPG, GIF up to 10MB
+                <p className="text-xs text-muted-foreground/70 mt-2">
+                  PNG, JPG, GIF up to 5MB
                 </p>
               </>
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Submit Button */}
       <div className="pt-4">
-        <button
+        <Button
           type="submit"
+          className="w-full"
+          size="lg"
           disabled={submitReport.isPending}
-          className={`
-            w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white 
-            bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500
-            disabled:opacity-50 disabled:cursor-not-allowed transition-all
-          `}
         >
-          {submitReport.isPending ? 'Submitting...' : 'Submit Report'}
-        </button>
+          {submitReport.isPending ? 'Submitting Report...' : 'Submit Report'}
+        </Button>
       </div>
     </form>
   )

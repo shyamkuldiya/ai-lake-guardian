@@ -29,12 +29,13 @@ export function HealthScoreGauge({
   animated = true,
 }: HealthScoreGaugeProps) {
   const config = SIZE_CONFIG[size]
-  const bandConfig = HEALTH_BAND_CONFIG[band]
-
   const radius = (config.size - config.strokeWidth) / 2
   const circumference = 2 * Math.PI * radius
   const progress = (score / 100) * circumference
   const offset = circumference - progress
+
+  // Use HSL variables for color
+  const colorVar = `var(--color-${band})`
 
   return (
     <div className="flex flex-col items-center gap-2">
@@ -44,7 +45,7 @@ export function HealthScoreGauge({
       >
         {/* Background ring */}
         <svg
-          className="absolute inset-0 -rotate-90"
+          className="-rotate-90 transform"
           width={config.size}
           height={config.size}
         >
@@ -55,7 +56,7 @@ export function HealthScoreGauge({
             fill="none"
             stroke="currentColor"
             strokeWidth={config.strokeWidth}
-            className="text-slate-700/50"
+            className="text-muted/30"
           />
           {/* Progress ring */}
           <circle
@@ -63,13 +64,14 @@ export function HealthScoreGauge({
             cy={config.size / 2}
             r={radius}
             fill="none"
-            stroke={bandConfig.color}
+            stroke={`hsl(${colorVar})`}
             strokeWidth={config.strokeWidth}
             strokeDasharray={circumference}
-            strokeDashoffset={animated ? offset : offset}
-            className="gauge-ring"
+            strokeDashoffset={offset}
+            strokeLinecap="round"
+            className="transition-all duration-1000 ease-out"
             style={{
-              filter: `drop-shadow(0 0 6px ${bandConfig.color}40)`,
+              filter: `drop-shadow(0 0 4px hsl(${colorVar} / 0.5))`,
             }}
           />
         </svg>
@@ -78,12 +80,12 @@ export function HealthScoreGauge({
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span
             className={`font-bold ${config.fontSize}`}
-            style={{ color: bandConfig.color }}
+            style={{ color: `hsl(${colorVar})` }}
           >
             {score}
           </span>
           {trend && (
-            <span className="text-xs text-slate-400 flex items-center gap-0.5">
+            <span className="text-xs text-muted-foreground flex items-center gap-0.5">
               {trend.direction === 'up' && '↑'}
               {trend.direction === 'down' && '↓'}
               {trend.direction === 'stable' && '→'}
@@ -95,16 +97,14 @@ export function HealthScoreGauge({
 
       {showLabel && (
         <span
-          className="px-3 py-1 rounded-full text-sm font-medium health-badge"
-          style={
-            {
-              '--health-color': bandConfig.color,
-              color: bandConfig.color,
-              background: bandConfig.bgColor,
-            } as React.CSSProperties
-          }
+          className="px-2.5 py-0.5 rounded-full text-xs font-semibold"
+          style={{
+            color: `hsl(${colorVar})`,
+            backgroundColor: `hsl(${colorVar} / 0.1)`,
+            border: `1px solid hsl(${colorVar} / 0.2)`,
+          }}
         >
-          {bandConfig.label}
+          {HEALTH_BAND_CONFIG[band].label}
         </span>
       )}
     </div>

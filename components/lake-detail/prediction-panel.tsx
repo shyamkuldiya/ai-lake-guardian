@@ -5,6 +5,8 @@ import {
   RISK_LEVEL_CONFIG,
   PREDICTION_WINDOW_LABELS,
 } from '@/lib/schemas/prediction'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 
 interface PredictionPanelProps {
   predictions: Prediction[]
@@ -16,70 +18,75 @@ export function PredictionPanel({
   isLoading = false,
 }: PredictionPanelProps) {
   if (isLoading) {
-    return <div className="card p-6 animate-pulse h-64 bg-slate-800/50" />
+    return <div className="h-64 bg-muted/20 animate-pulse rounded-xl" />
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      {predictions.map((prediction, index) => {
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {predictions.map((prediction) => {
         const riskConfig = RISK_LEVEL_CONFIG[prediction.riskLevel]
         const isPositive = prediction.scoreDelta >= 0
 
+        // Map risk to semantic colors
+        let borderColor = ''
+        if (prediction.riskLevel === 'critical')
+          borderColor = 'border-destructive'
+        else if (prediction.riskLevel === 'high')
+          borderColor = 'border-destructive/70'
+        else if (prediction.riskLevel === 'medium')
+          borderColor = 'border-amber-500'
+
         return (
-          <div
-            key={prediction.id}
-            className={`card p-4 flex flex-col animate-slide-in-right stagger-${index + 1}`}
-            style={{
-              borderColor: `${riskConfig.color}30`,
-              background: `linear-gradient(to bottom right, ${riskConfig.bgColor}, transparent)`,
-            }}
-          >
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
-                {PREDICTION_WINDOW_LABELS[prediction.window]}
-              </span>
-              <span
-                className="px-2 py-0.5 rounded text-xs font-bold"
-                style={{
-                  color: riskConfig.color,
-                  background: `${riskConfig.color}20`,
-                }}
-              >
-                {riskConfig.label}
-              </span>
-            </div>
+          <Card key={prediction.id} className={`${borderColor} h-full`}>
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                  {PREDICTION_WINDOW_LABELS[prediction.window]}
+                </CardTitle>
+                <Badge
+                  variant="outline"
+                  className="font-normal capitalize"
+                  style={{
+                    color: riskConfig.color,
+                    borderColor: `${riskConfig.color}40`,
+                  }}
+                >
+                  {riskConfig.label} Risk
+                </Badge>
+              </div>
+            </CardHeader>
 
-            <div className="flex items-baseline gap-2 mb-4">
-              <span className="text-3xl font-bold text-slate-100">
-                {prediction.predictedScore}
-              </span>
-              <span
-                className={`text-sm font-medium ${isPositive ? 'text-emerald-400' : 'text-red-400'}`}
-              >
-                {isPositive ? '↑' : '↓'} {Math.abs(prediction.scoreDelta)}
-              </span>
-            </div>
-
-            <div className="mt-auto space-y-3">
-              <div>
-                <h5 className="text-xs uppercase text-slate-500 font-semibold mb-1">
-                  Primary Factor
-                </h5>
-                <p className="text-sm text-slate-300 line-clamp-2">
-                  {prediction.causes[0]}
-                </p>
+            <CardContent className="space-y-4 pt-2">
+              <div className="flex items-baseline gap-3">
+                <span className="text-4xl font-bold tracking-tighter">
+                  {prediction.predictedScore}
+                </span>
+                <span
+                  className={`text-sm font-medium flex items-center ${isPositive ? 'text-emerald-500' : 'text-destructive'}`}
+                >
+                  {isPositive ? '↑' : '↓'} {Math.abs(prediction.scoreDelta)} pts
+                </span>
               </div>
 
-              <div>
-                <h5 className="text-xs uppercase text-slate-500 font-semibold mb-1">
-                  Recommendation
-                </h5>
-                <p className="text-sm text-slate-300 line-clamp-2">
-                  {prediction.recommendations[0]}
-                </p>
+              <div className="space-y-3 pt-2">
+                <div>
+                  <h5 className="text-xs font-semibold text-muted-foreground uppercase mb-1">
+                    Primary Factor
+                  </h5>
+                  <p className="text-sm leading-snug">{prediction.causes[0]}</p>
+                </div>
+
+                <div>
+                  <h5 className="text-xs font-semibold text-muted-foreground uppercase mb-1">
+                    Recommendation
+                  </h5>
+                  <p className="text-sm leading-snug">
+                    {prediction.recommendations[0]}
+                  </p>
+                </div>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         )
       })}
     </div>

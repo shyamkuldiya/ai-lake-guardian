@@ -6,6 +6,8 @@ import { StatsOverview, LakeCard, AlertCard } from '@/components/dashboard'
 import { MOCK_LAKES, MOCK_ALERTS } from '@/lib/mock-data'
 import type { LakeListItem } from '@/lib/schemas/lake'
 import type { Alert } from '@/lib/schemas/alert'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 
 export default function DashboardPage() {
   const [lakes, setLakes] = useState<LakeListItem[]>([])
@@ -13,38 +15,38 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Simulate API fetch
     const fetchData = async () => {
       await new Promise((resolve) => setTimeout(resolve, 500))
       setLakes(MOCK_LAKES)
       setAlerts(MOCK_ALERTS)
       setIsLoading(false)
     }
-
     fetchData()
   }, [])
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+      <main className="container mx-auto px-4 md:px-6 py-8 space-y-8">
         {/* Hero Section */}
-        <div className="mb-8 animate-fade-in">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gradient mb-2">
-            Lake Health Dashboard
-          </h1>
-          <p className="text-slate-400">
-            AI-powered monitoring and prediction for Udaipur&apos;s lakes
-          </p>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+            <p className="text-muted-foreground">
+              Real-time monitoring and predictive analytics for Udaipur lakes.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline">Sync Data</Button>
+            <Button>Download Report</Button>
+          </div>
         </div>
 
         {/* Stats Overview */}
-        <section className="mb-8">
+        <section>
           {isLoading ? (
-            <div className="card p-4 animate-pulse">
-              <div className="h-20 bg-slate-700/50 rounded" />
-            </div>
+            <div className="w-full h-40 bg-muted/20 animate-pulse rounded-xl" />
           ) : (
             <StatsOverview
               lakes={lakes}
@@ -53,94 +55,89 @@ export default function DashboardPage() {
           )}
         </section>
 
-        {/* Main Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Lakes Section */}
-          <section className="lg:col-span-2">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-slate-100 flex items-center gap-2">
-                <span>🏞️</span>
+          <section className="lg:col-span-2 space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold tracking-tight">
                 Monitored Lakes
               </h2>
+              <Button variant="ghost" size="sm">
+                View All
+              </Button>
             </div>
 
             {isLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div key={i} className="card p-4 animate-pulse">
-                    <div className="h-24 bg-slate-700/50 rounded" />
-                  </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div
+                    key={i}
+                    className="h-32 bg-muted/20 animate-pulse rounded-xl"
+                  />
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {lakes.map((lake, index) => (
-                  <div key={lake.id} className={`stagger-${(index % 5) + 1}`}>
-                    <LakeCard lake={lake} />
-                  </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {lakes.map((lake) => (
+                  <LakeCard key={lake.id} lake={lake} />
                 ))}
               </div>
             )}
           </section>
 
           {/* Alerts Section */}
-          <section className="lg:col-span-1">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-slate-100 flex items-center gap-2">
-                <span>🚨</span>
-                Active Alerts
+          <section className="lg:col-span-1 space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold tracking-tight">
+                Recent Alerts
               </h2>
-              <span className="text-sm text-slate-400">
-                {alerts.filter((a) => a.status === 'active').length} active
-              </span>
+              <Button variant="ghost" size="sm" className="text-xs">
+                View History
+              </Button>
             </div>
 
             {isLoading ? (
               <div className="space-y-3">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="card p-4 animate-pulse">
-                    <div className="h-20 bg-slate-700/50 rounded" />
-                  </div>
+                  <div
+                    key={i}
+                    className="h-24 bg-muted/20 animate-pulse rounded-xl"
+                  />
                 ))}
               </div>
             ) : alerts.length > 0 ? (
               <div className="space-y-3">
-                {alerts.map((alert, index) => (
-                  <div key={alert.id} className={`stagger-${(index % 5) + 1}`}>
-                    <AlertCard alert={alert} compact />
-                  </div>
+                {alerts.map((alert) => (
+                  <AlertCard key={alert.id} alert={alert} compact />
                 ))}
               </div>
             ) : (
-              <div className="card p-8 text-center">
-                <span className="text-4xl mb-4 block">✓</span>
-                <p className="text-slate-400">No active alerts</p>
-                <p className="text-sm text-slate-500 mt-1">
-                  All lakes are operating normally
-                </p>
-              </div>
+              <Card className="p-8 text-center text-muted-foreground">
+                No active alerts used.
+              </Card>
             )}
           </section>
         </div>
 
-        {/* Info Banner */}
-        <section className="mt-8">
-          <div className="glass rounded-2xl p-6 border border-sky-500/20">
-            <div className="flex items-start gap-4">
-              <span className="text-3xl">🤖</span>
-              <div>
-                <h3 className="font-semibold text-slate-100 mb-1">
-                  AI-Powered Predictions
+        {/* AI Insight Banner */}
+        <section>
+          <Card className="bg-primary/5 border-primary/20">
+            <CardContent className="p-6 flex items-start gap-4">
+              <div className="p-2 bg-primary/10 rounded-lg text-primary text-2xl">
+                ✨
+              </div>
+              <div className="space-y-1">
+                <h3 className="font-semibold text-lg text-primary">
+                  AI Insight
                 </h3>
-                <p className="text-slate-400 text-sm">
-                  Our AI analyzes weather patterns, satellite imagery, and
-                  historical data to predict lake health 24-72 hours in advance.
-                  Click on any lake to see detailed predictions and recommended
-                  actions.
+                <p className="text-muted-foreground max-w-3xl">
+                  Weather patterns indicate a high probability of reduced
+                  dissolved oxygen levels in Fateh Sagar Lake over the next 48
+                  hours. Recommended preventive aeration in the northern sector.
                 </p>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </section>
       </main>
     </div>

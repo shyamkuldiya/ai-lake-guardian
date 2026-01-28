@@ -1,310 +1,136 @@
 @import 'tailwindcss';
 
-/* ============================================
-   AI Lake Guardian Design System
-   ============================================ */
+@theme {
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+}
 
 :root {
-  /* Health Score Colors */
-  --color-healthy: #10b981;
-  --color-at-risk: #f59e0b;
-  --color-degrading: #f97316;
-  --color-critical: #ef4444;
-
-  /* Primary Brand */
-  --color-primary: #0ea5e9;
-  --color-primary-dark: #0284c7;
-  --color-primary-light: #38bdf8;
-
-  /* Background Colors */
-  --color-bg-primary: #0f172a;
-  --color-bg-secondary: #1e293b;
-  --color-bg-card: #334155;
-  --color-bg-elevated: #475569;
-
-  /* Text Colors */
-  --color-text-primary: #f8fafc;
-  --color-text-secondary: #94a3b8;
-  --color-text-muted: #64748b;
-
-  /* Border Colors */
-  --color-border: #475569;
-  --color-border-light: #334155;
-
-  /* Semantic Colors */
-  --color-info: #3b82f6;
-  --color-success: #22c55e;
-  --color-warning: #eab308;
-  --color-error: #ef4444;
-
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
-  --shadow-glow-primary: 0 0 20px rgba(14, 165, 233, 0.3);
-  --shadow-glow-healthy: 0 0 20px rgba(16, 185, 129, 0.3);
-  --shadow-glow-warning: 0 0 20px rgba(245, 158, 11, 0.3);
-  --shadow-glow-critical: 0 0 20px rgba(239, 68, 68, 0.3);
-
-  /* Transitions */
-  --transition-fast: 150ms ease;
-  --transition-normal: 300ms ease;
-  --transition-slow: 500ms ease;
-
-  /* Border Radius */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
-  --radius-2xl: 1.5rem;
-  --radius-full: 9999px;
+  --background: 0 0% 100%;
+  --foreground: 240 10% 3.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 3.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 10% 3.9%;
+  --primary: 240 5.9% 10%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 240 4.8% 95.9%;
+  --secondary-foreground: 240 5.9% 10%;
+  --muted: 240 4.8% 95.9%;
+  --muted-foreground: 240 3.8% 46.1%;
+  --accent: 240 4.8% 95.9%;
+  --accent-foreground: 240 5.9% 10%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 240 5.9% 90%;
+  --input: 240 5.9% 90%;
+  --ring: 240 10% 3.9%;
+  --radius: 0.5rem;
+  --chart-1: 12 76% 61%;
+  --chart-2: 173 58% 39%;
+  --chart-3: 197 37% 24%;
+  --chart-4: 43 74% 66%;
+  --chart-5: 27 87% 67%;
 }
 
-/* ============================================
-   Base Styles
-   ============================================ */
-
-body {
-  font-family: var(--font-sans), system-ui, sans-serif;
-  background: linear-gradient(135deg, var(--color-bg-primary) 0%, #1a1f35 100%);
-  color: var(--color-text-primary);
-  min-height: 100vh;
+.dark {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 0 0% 98%;
+  --primary-foreground: 240 5.9% 10%;
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --ring: 240 4.9% 83.9%;
+  --chart-1: 220 70% 50%;
+  --chart-2: 160 60% 45%;
+  --chart-3: 30 80% 55%;
+  --chart-4: 280 65% 60%;
+  --chart-5: 340 75% 55%;
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--color-bg-secondary);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-muted);
-}
-
-/* ============================================
-   Utility Classes
-   ============================================ */
-
-.glass {
-  background: rgba(30, 41, 59, 0.8);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.glass-light {
-  background: rgba(51, 65, 85, 0.6);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.gradient-primary {
-  background: linear-gradient(
-    135deg,
-    var(--color-primary) 0%,
-    var(--color-primary-dark) 100%
-  );
-}
-
-.gradient-healthy {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-}
-
-.gradient-warning {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-}
-
-.gradient-critical {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-}
-
-.text-gradient {
-  background: linear-gradient(
-    135deg,
-    var(--color-primary-light) 0%,
-    var(--color-primary) 100%
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* ============================================
-   Health Score Badge Colors
-   ============================================ */
-
-.health-healthy {
-  --health-color: var(--color-healthy);
-  color: var(--color-healthy);
-}
-
-.health-at-risk {
-  --health-color: var(--color-at-risk);
-  color: var(--color-at-risk);
-}
-
-.health-degrading {
-  --health-color: var(--color-degrading);
-  color: var(--color-degrading);
-}
-
-.health-critical {
-  --health-color: var(--color-critical);
-  color: var(--color-critical);
-}
-
-.health-badge {
-  background: color-mix(in srgb, var(--health-color) 15%, transparent);
-  border: 1px solid color-mix(in srgb, var(--health-color) 30%, transparent);
-}
-
-/* ============================================
-   Animation Classes
-   ============================================ */
-
-@keyframes pulse-glow {
-  0%,
-  100% {
-    box-shadow: 0 0 10px var(--health-color);
+@layer base {
+  * {
+    @apply border-border;
   }
-  50% {
-    box-shadow: 0 0 25px var(--health-color);
+  body {
+    @apply bg-background text-foreground;
   }
 }
 
-@keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slide-in-right {
-  from {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes scale-in {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-.animate-fade-in {
-  animation: fade-in 0.3s ease-out;
-}
-
-.animate-slide-in-right {
-  animation: slide-in-right 0.3s ease-out;
-}
-
-.animate-scale-in {
-  animation: scale-in 0.2s ease-out;
-}
-
-/* Staggered animation delays */
-.stagger-1 {
-  animation-delay: 50ms;
-}
-.stagger-2 {
-  animation-delay: 100ms;
-}
-.stagger-3 {
-  animation-delay: 150ms;
-}
-.stagger-4 {
-  animation-delay: 200ms;
-}
-.stagger-5 {
-  animation-delay: 250ms;
-}
-
-/* ============================================
-   Component Styles
-   ============================================ */
-
-.card {
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border-light);
-  border-radius: var(--radius-xl);
-  transition: all var(--transition-normal);
-}
-
-.card:hover {
-  border-color: var(--color-border);
-  box-shadow: var(--shadow-md);
-}
-
-.card-elevated {
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-}
-
-/* Score gauge styles */
-.gauge-ring {
-  stroke-linecap: round;
-  transition: stroke-dashoffset var(--transition-slow);
-}
-
-/* Map marker styles */
-.map-marker {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  font-size: 12px;
-  box-shadow: var(--shadow-md);
-  transition: transform var(--transition-fast);
-  cursor: pointer;
-}
-
-.map-marker:hover {
-  transform: scale(1.2);
-}
-
-/* ============================================
-   Responsive Utilities
-   ============================================ */
-
-@media (max-width: 768px) {
-  .hide-mobile {
-    display: none !important;
-  }
-}
-
-@media (min-width: 769px) {
-  .hide-desktop {
-    display: none !important;
-  }
+/* Custom logical colors for health bands */
+:root {
+  --color-healthy: 142 76% 36%;
+  --color-at-risk: 45 93% 47%;
+  --color-degrading: 24 94% 50%;
+  --color-critical: 0 84% 60%;
 }

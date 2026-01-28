@@ -4,6 +4,9 @@ import Link from 'next/link'
 import type { LakeListItem } from '@/lib/schemas/lake'
 import { HEALTH_BAND_CONFIG } from '@/lib/schemas/score'
 import { HealthScoreGauge } from './health-score-gauge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
 
 interface LakeCardProps {
   lake: LakeListItem
@@ -16,40 +19,39 @@ export function LakeCard({ lake, isSelected, onClick }: LakeCardProps) {
 
   return (
     <Link href={`/lake/${lake.slug}`}>
-      <div
-        className={`
-          card p-4 cursor-pointer animate-fade-in
-          ${isSelected ? 'ring-2 ring-sky-500' : ''}
-          hover:scale-[1.02] transition-transform
-        `}
+      <Card
+        className={cn(
+          'transition-all hover:shadow-md cursor-pointer h-full border-muted',
+          isSelected && 'ring-2 ring-primary'
+        )}
         onClick={onClick}
       >
-        <div className="flex items-center justify-between gap-4">
-          {/* Lake Info */}
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-slate-100 truncate">
+        <CardContent className="p-4 flex items-center justify-between gap-4">
+          <div className="flex-1 min-w-0 space-y-1">
+            <h3 className="font-semibold text-lg leading-none truncate">
               {lake.name}
             </h3>
-            <p className="text-sm text-slate-400 mt-1">
+            <p className="text-sm text-muted-foreground">
               {lake.lastUpdated
                 ? `Updated ${formatTimeAgo(lake.lastUpdated)}`
                 : 'No data'}
             </p>
 
             {bandConfig && (
-              <span
-                className="inline-flex mt-2 px-2 py-0.5 rounded-full text-xs font-medium"
+              <Badge
+                variant="outline"
+                className="mt-2"
                 style={{
-                  color: bandConfig.color,
-                  background: bandConfig.bgColor,
+                  color: `hsl(var(--color-${lake.band}))`, // Using CSS variables from globals.css
+                  borderColor: `hsl(var(--color-${lake.band}) / 0.3)`,
+                  backgroundColor: `hsl(var(--color-${lake.band}) / 0.1)`,
                 }}
               >
                 {bandConfig.label}
-              </span>
+              </Badge>
             )}
           </div>
 
-          {/* Score */}
           {lake.currentScore !== null && lake.band && (
             <HealthScoreGauge
               score={lake.currentScore}
@@ -58,8 +60,8 @@ export function LakeCard({ lake, isSelected, onClick }: LakeCardProps) {
               showLabel={false}
             />
           )}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </Link>
   )
 }
