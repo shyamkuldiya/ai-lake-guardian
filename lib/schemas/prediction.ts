@@ -20,7 +20,7 @@ export type RiskLevel = z.infer<typeof RiskLevelEnum>
 export const PredictionSchema = z.object({
   id: z.string().uuid(),
   lakeId: z.string().uuid(),
-  window: PredictionWindowEnum,
+  predictionWindow: PredictionWindowEnum,
   predictedScore: z.number().min(0).max(100),
   currentScore: z.number().min(0).max(100),
   scoreDelta: z.number(),

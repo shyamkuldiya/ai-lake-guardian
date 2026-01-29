@@ -1,30 +1,55 @@
 import { NextResponse } from 'next/server'
-import { MOCK_ALERTS } from '@/lib/mock-data'
+import { createClient } from '@/lib/supabase/server'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const lakeId = searchParams.get('lakeId')
   const status = searchParams.get('status')
 
-  let alerts = [...MOCK_ALERTS]
+  const supabase = await createClient()
 
-  // Filter by lakeId if provided
+  let query = supabase.from('alerts').select('*, lakes(name)') // Join to get lake name if needed
+
   if (lakeId) {
-    alerts = alerts.filter((a) => a.lakeId === lakeId)
+    query = query.eq('lake_id', lakeId)
   }
 
-  // Filter by status if provided
   if (status) {
-    alerts = alerts.filter((a) => a.status === status)
+    query = query.eq('status', status)
   }
 
-  // Sort by severity (critical first) then by date
-  alerts.sort((a, b) => {
-    const severityOrder = { critical: 0, warning: 1, info: 2 }
-    const severityDiff = severityOrder[a.severity] - severityOrder[b.severity]
-    if (severityDiff !== 0) return severityDiff
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  const { data: alerts, error } = await query.order('created_at', {
+    ascending: false,
   })
 
-  return NextResponse.json(alerts)
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  // Map database fields and lake names
+  const processed = (alerts || []).map((a) => ({
+    id: a.id,
+    lakeId: a.lake_id,
+    lakeName: a.lakes?.name || 'Unknown Lake',
+    severity: a.severity,
+    status: a.status,
+    title: a.title,
+    description: a.description,
+    cause: a.cause,
+    recommendation: a.recommendation,
+    triggeredBy: a.triggered_by,
+    createdAt: a.created_at,
+  }))
+
+  // Sort by severity (critical > warning > info)
+  const severityOrder: Record<string, number> = {
+    critical: 0,
+    warning: 1,
+    info: 2,
+  }
+  processed.sort(
+    (a, b) => severityOrder[a.severity] - severityOrder[b.severity]
+  )
+
+  return NextResponse.json(processed)
 }

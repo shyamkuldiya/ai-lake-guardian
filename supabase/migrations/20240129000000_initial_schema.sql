@@ -65,7 +65,7 @@ create type risk_level as enum ('low', 'medium', 'high', 'critical');
 create table predictions (
   id uuid primary key default uuid_generate_v4(),
   lake_id uuid references lakes(id) on delete cascade not null,
-  window prediction_window not null,
+  prediction_window prediction_window not null,
   predicted_score numeric not null,
   current_score numeric not null,
   score_delta numeric not null,

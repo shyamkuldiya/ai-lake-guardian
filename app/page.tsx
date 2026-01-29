@@ -1,28 +1,30 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { Header } from '@/components/layout'
 import { StatsOverview, LakeCard, AlertCard } from '@/components/dashboard'
-import { MOCK_LAKES, MOCK_ALERTS } from '@/lib/mock-data'
-import type { LakeListItem } from '@/lib/schemas/lake'
-import type { Alert } from '@/lib/schemas/alert'
+import { useLakes, useAlerts } from '@/lib/hooks'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { RefreshCw, Download } from 'lucide-react' // If these fail I'll fallback to text
 
 export default function DashboardPage() {
-  const [lakes, setLakes] = useState<LakeListItem[]>([])
-  const [alerts, setAlerts] = useState<Alert[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const {
+    data: lakes,
+    isLoading: isLakesLoading,
+    refetch: refetchLakes,
+  } = useLakes()
+  const {
+    data: alerts,
+    isLoading: isAlertsLoading,
+    refetch: refetchAlerts,
+  } = useAlerts()
 
-  useEffect(() => {
-    const fetchData = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 500))
-      setLakes(MOCK_LAKES)
-      setAlerts(MOCK_ALERTS)
-      setIsLoading(false)
-    }
-    fetchData()
-  }, [])
+  const isLoading = isLakesLoading || isAlertsLoading
+
+  const handleSync = () => {
+    refetchLakes()
+    refetchAlerts()
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -38,8 +40,17 @@ export default function DashboardPage() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline">Sync Data</Button>
-            <Button>Download Report</Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSync}
+              disabled={isLoading}
+            >
+              <span className="mr-2">🔄</span> Sync Data
+            </Button>
+            <Button size="sm">
+              <span className="mr-2">📥</span> Download Report
+            </Button>
           </div>
         </div>
 
@@ -49,8 +60,10 @@ export default function DashboardPage() {
             <div className="w-full h-40 bg-muted/20 animate-pulse rounded-xl" />
           ) : (
             <StatsOverview
-              lakes={lakes}
-              alertCount={alerts.filter((a) => a.status === 'active').length}
+              lakes={lakes ?? []}
+              alertCount={
+                alerts?.filter((a) => a.status === 'active').length ?? 0
+              }
             />
           )}
         </section>
@@ -67,7 +80,7 @@ export default function DashboardPage() {
               </Button>
             </div>
 
-            {isLoading ? (
+            {isLakesLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[1, 2, 3, 4].map((i) => (
                   <div
@@ -78,9 +91,14 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {lakes.map((lake) => (
+                {lakes?.map((lake) => (
                   <LakeCard key={lake.id} lake={lake} />
                 ))}
+                {(!lakes || lakes.length === 0) && (
+                  <Card className="col-span-full p-12 text-center text-muted-foreground border-dashed">
+                    No lakes found in database. Please seed the data.
+                  </Card>
+                )}
               </div>
             )}
           </section>
@@ -96,7 +114,7 @@ export default function DashboardPage() {
               </Button>
             </div>
 
-            {isLoading ? (
+            {isAlertsLoading ? (
               <div className="space-y-3">
                 {[1, 2, 3].map((i) => (
                   <div
@@ -105,15 +123,15 @@ export default function DashboardPage() {
                   />
                 ))}
               </div>
-            ) : alerts.length > 0 ? (
+            ) : alerts && alerts.length > 0 ? (
               <div className="space-y-3">
                 {alerts.map((alert) => (
                   <AlertCard key={alert.id} alert={alert} compact />
                 ))}
               </div>
             ) : (
-              <Card className="p-8 text-center text-muted-foreground">
-                No active alerts used.
+              <Card className="p-8 text-center text-muted-foreground border-dashed">
+                No active alerts.
               </Card>
             )}
           </section>
@@ -131,9 +149,9 @@ export default function DashboardPage() {
                   AI Insight
                 </h3>
                 <p className="text-muted-foreground max-w-3xl">
-                  Weather patterns indicate a high probability of reduced
-                  dissolved oxygen levels in Fateh Sagar Lake over the next 48
-                  hours. Recommended preventive aeration in the northern sector.
+                  Weather patterns indicate a 85% probability of stable health
+                  scores across all Udaipur lakes for the next 48 hours. Overall
+                  ecosystem vitality remains High.
                 </p>
               </div>
             </CardContent>

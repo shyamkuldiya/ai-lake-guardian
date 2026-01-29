@@ -174,7 +174,7 @@ export function generateMockPredictions(
     return {
       id: crypto.randomUUID(),
       lakeId,
-      window,
+      predictionWindow: window,
       predictedScore,
       currentScore,
       scoreDelta: delta,

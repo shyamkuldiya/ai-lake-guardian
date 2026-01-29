@@ -41,7 +41,7 @@ export function PredictionPanel({
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-                  {PREDICTION_WINDOW_LABELS[prediction.window]}
+                  {PREDICTION_WINDOW_LABELS[prediction.predictionWindow]}
                 </CardTitle>
                 <Badge
                   variant="outline"

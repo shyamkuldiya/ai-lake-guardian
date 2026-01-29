@@ -78,9 +78,11 @@ export const predictionsApi = {
 
   getByWindow: async (
     lakeId: string,
-    window: PredictionWindow
+    predictionWindow: PredictionWindow
   ): Promise<Prediction> => {
-    return apiFetch<Prediction>(`/lakes/${lakeId}/predictions/${window}`)
+    return apiFetch<Prediction>(
+      `/lakes/${lakeId}/predictions/${predictionWindow}`
+    )
   },
 }
 

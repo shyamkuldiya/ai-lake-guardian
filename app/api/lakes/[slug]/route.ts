@@ -1,37 +1,40 @@
 import { NextResponse } from 'next/server'
-import {
-  MOCK_LAKE_DETAILS,
-  MOCK_LAKES,
-  generateMockHealthScore,
-} from '@/lib/mock-data'
+import { createClient } from '@/lib/supabase/server'
+
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ slug: string }> }
 ) {
-  const { slug } = await params
+  const { slug: identifier } = await params
+  const isUuid = UUID_REGEX.test(identifier)
 
-  // Try to get from detailed mock data first
-  const lake = MOCK_LAKE_DETAILS[slug]
+  const supabase = await createClient()
 
-  if (lake) {
-    return NextResponse.json(lake)
+  const query = supabase.from('lakes').select('*')
+
+  if (isUuid) {
+    query.eq('id', identifier)
+  } else {
+    query.eq('slug', identifier)
   }
 
-  // Fallback to list data
-  const listItem = MOCK_LAKES.find((l) => l.slug === slug)
+  const { data: lake, error } = await query.single()
 
-  if (listItem) {
-    return NextResponse.json({
-      id: listItem.id,
-      name: listItem.name,
-      slug: listItem.slug,
-      location: listItem.location,
-      areaSquareKm: 5.0, // Default
-      createdAt: new Date('2024-01-01'),
-      updatedAt: new Date(),
-    })
+  if (error || !lake) {
+    return NextResponse.json({ error: 'Lake not found' }, { status: 404 })
   }
 
-  return NextResponse.json({ error: 'Lake not found' }, { status: 404 })
+  return NextResponse.json({
+    id: lake.id,
+    name: lake.name,
+    slug: lake.slug,
+    description: lake.description,
+    location: lake.location,
+    areaSquareKm: lake.area_sq_km,
+    createdAt: lake.created_at,
+    updatedAt: lake.updated_at,
+  })
 }

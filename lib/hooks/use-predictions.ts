@@ -8,7 +8,7 @@ import type { PredictionWindow } from '@/lib/schemas/prediction'
 export const predictionKeys = {
   all: ['predictions'] as const,
   lake: (lakeId: string) => [...predictionKeys.all, lakeId] as const,
-  window: (lakeId: string, window: PredictionWindow) =>
+  predictionWindow: (lakeId: string, window: PredictionWindow) =>
     [...predictionKeys.lake(lakeId), window] as const,
 }
 
@@ -33,7 +33,7 @@ export function usePredictions(lakeId: string) {
  */
 export function usePrediction(lakeId: string, window: PredictionWindow) {
   return useQuery({
-    queryKey: predictionKeys.window(lakeId, window),
+    queryKey: predictionKeys.predictionWindow(lakeId, window),
     queryFn: () => predictionsApi.getByWindow(lakeId, window),
     staleTime: 1000 * 60 * 15, // 15 minutes
     enabled: !!lakeId && !!window,

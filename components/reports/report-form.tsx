@@ -3,46 +3,82 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   ReportFormSchema,
   type ReportFormData,
   REPORT_TYPE_INFO,
 } from '@/lib/schemas/report'
-import { useSubmitReport, useUploadImage } from '@/lib/hooks'
+import { useSubmitReport, useLakes } from '@/lib/hooks'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 export function ReportForm() {
   const router = useRouter()
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
+  const [isGettingLocation, setIsGettingLocation] = useState(false)
+
+  const { data: lakes } = useLakes()
+  const submitReport = useSubmitReport()
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     watch,
+    setValue,
   } = useForm<ReportFormData>({
     resolver: zodResolver(ReportFormSchema),
     defaultValues: {
-      lakeId: '550e8400-e29b-41d4-a716-446655440001',
-      location: { latitude: 24.5764, longitude: 73.6827 },
+      location: { latitude: 24.5854, longitude: 73.7125 }, // Default to Udaipur
     },
   })
 
-  const submitReport = useSubmitReport()
+  // Handle Location Detection
+  const handleGetLocation = () => {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser')
+      return
+    }
+
+    setIsGettingLocation(true)
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setValue('location', {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        })
+        setIsGettingLocation(false)
+      },
+      (error) => {
+        console.error('Error getting location:', error)
+        alert('Unable to retrieve your location. Using default center.')
+        setIsGettingLocation(false)
+      }
+    )
+  }
 
   const onSubmit = async (data: ReportFormData) => {
     try {
-      let imageUrl = ''
-      if (imageFile) {
-        imageUrl = URL.createObjectURL(imageFile) // Mock
-      }
+      let imageUrl = 'https://picsum.photos/seed/lake/800/600' // Default mock URL
+
+      // In a real app, we'd upload to Supabase Storage first
+      // if (imageFile) {
+      //   const { url } = await uploadImage.mutateAsync(imageFile);
+      //   imageUrl = url;
+      // }
 
       await submitReport.mutateAsync({
         ...data,
@@ -68,6 +104,31 @@ export function ReportForm() {
       onSubmit={handleSubmit(onSubmit)}
       className="space-y-8 max-w-2xl mx-auto"
     >
+      {/* Lake Selection */}
+      <div className="space-y-2">
+        <Label>Select Affected Lake</Label>
+        <Select
+          onValueChange={(val) => setValue('lakeId', val)}
+          defaultValue={watch('lakeId')}
+        >
+          <SelectTrigger className="w-full h-12 bg-card border-muted">
+            <SelectValue placeholder="Which lake is this near?" />
+          </SelectTrigger>
+          <SelectContent>
+            {lakes?.map((lake) => (
+              <SelectItem key={lake.id} value={lake.id}>
+                {lake.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {errors.lakeId && (
+          <p className="text-sm text-destructive font-medium">
+            {errors.lakeId.message}
+          </p>
+        )}
+      </div>
+
       {/* Report Type Selection */}
       <div className="space-y-4">
         <Label className="text-base">What did you observe?</Label>
@@ -116,7 +177,7 @@ export function ReportForm() {
         <Textarea
           id="description"
           placeholder="Please describe what you saw, specific location details, or any other relevant information."
-          className="min-h-[120px] resize-y"
+          className="min-h-[120px] resize-y bg-card border-muted"
           {...register('description')}
         />
         {errors.description && (
@@ -128,26 +189,32 @@ export function ReportForm() {
 
       {/* Location */}
       <div className="space-y-2">
-        <Label htmlFor="location">Location</Label>
+        <Label htmlFor="location">Verification Location</Label>
         <div className="flex gap-2">
           <Input
             readOnly
-            value="Current Location (24.5854° N, 73.7125° E)"
-            className="bg-muted/50 text-muted-foreground"
+            value={`Lat: ${watch('location.latitude').toFixed(4)}, Lng: ${watch('location.longitude').toFixed(4)}`}
+            className="bg-muted/50 text-muted-foreground border-muted"
           />
-          <Button type="button" variant="outline">
-            📍 Update
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleGetLocation}
+            disabled={isGettingLocation}
+          >
+            {isGettingLocation ? '📍 Detecting...' : '📍 Use Current Location'}
           </Button>
         </div>
         <p className="text-xs text-muted-foreground">
-          For this prototype, we default to Udaipur center.
+          Your location will be used to verify the report and notify local
+          authorities.
         </p>
       </div>
 
       {/* Image Upload */}
       <div className="space-y-2">
         <Label>Evidence (Photo)</Label>
-        <Card className="border-2 border-dashed border-muted-foreground/25 hover:border-primary/50 transition-colors">
+        <Card className="border-2 border-dashed border-muted-foreground/25 hover:border-primary/50 transition-colors bg-card">
           <CardContent className="flex flex-col items-center justify-center py-10 text-center">
             {preview ? (
               <div className="relative w-full max-w-sm">
@@ -189,7 +256,7 @@ export function ReportForm() {
                 <div className="flex items-center text-sm text-muted-foreground">
                   <label
                     htmlFor="file-upload"
-                    className="relative cursor-pointer rounded-md font-medium text-primary hover:text-primary/90 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2"
+                    className="relative cursor-pointer rounded-md font-medium text-primary hover:text-primary/90"
                   >
                     <span>Upload a file</span>
                     <input
@@ -216,11 +283,12 @@ export function ReportForm() {
       <div className="pt-4">
         <Button
           type="submit"
-          className="w-full"
-          size="lg"
+          className="w-full py-6 text-lg"
           disabled={submitReport.isPending}
         >
-          {submitReport.isPending ? 'Submitting Report...' : 'Submit Report'}
+          {submitReport.isPending
+            ? 'Submitting Report...'
+            : '📤 Submit Official Report'}
         </Button>
       </div>
     </form>
