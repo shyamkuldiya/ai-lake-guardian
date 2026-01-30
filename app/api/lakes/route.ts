@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { getHealthBand } from '@/lib/schemas/score'
 
 export async function GET() {
   const supabase = await createClient()
@@ -35,17 +36,22 @@ export async function GET() {
     }
   })
 
-  const processedLakes = lakes.map((lake) => ({
-    id: lake.id,
-    name: lake.name,
-    slug: lake.slug,
-    description: lake.description,
-    location: lake.location,
-    areaSquareKm: lake.area_sq_km,
-    currentScore: latestScoresMap[lake.id]?.score || 0,
-    band: latestScoresMap[lake.id]?.band || 'healthy',
-    lastUpdated: latestScoresMap[lake.id]?.timestamp || lake.updated_at,
-  }))
+  const processedLakes = lakes.map((lake) => {
+    const score = latestScoresMap[lake.id]?.score || 0
+    const band = latestScoresMap[lake.id]?.band || getHealthBand(score)
+
+    return {
+      id: lake.id,
+      name: lake.name,
+      slug: lake.slug,
+      description: lake.description,
+      location: lake.location,
+      areaSquareKm: lake.area_sq_km,
+      currentScore: score,
+      band: band,
+      lastUpdated: latestScoresMap[lake.id]?.timestamp || lake.updated_at,
+    }
+  })
 
   return NextResponse.json(processedLakes)
 }

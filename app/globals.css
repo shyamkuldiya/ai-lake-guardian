@@ -32,6 +32,11 @@
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
 
+  --color-healthy: hsl(var(--healthy));
+  --color-at_risk: hsl(var(--at-risk));
+  --color-degrading: hsl(var(--degrading));
+  --color-critical: hsl(var(--critical));
+
   --color-chart-1: hsl(var(--chart-1));
   --color-chart-2: hsl(var(--chart-2));
   --color-chart-3: hsl(var(--chart-3));
@@ -89,6 +94,11 @@
   --chart-3: 197 37% 24%;
   --chart-4: 43 74% 66%;
   --chart-5: 27 87% 67%;
+
+  --healthy: 142 76% 36%;
+  --at-risk: 45 93% 47%;
+  --degrading: 24 94% 50%;
+  --critical: 0 84% 60%;
 }
 
 .dark {
@@ -116,6 +126,11 @@
   --chart-3: 30 80% 55%;
   --chart-4: 280 65% 60%;
   --chart-5: 340 75% 55%;
+
+  --healthy: 142 70% 45%;
+  --at-risk: 45 90% 50%;
+  --degrading: 24 90% 55%;
+  --critical: 0 80% 60%;
 }
 
 @layer base {
@@ -125,12 +140,4 @@
   body {
     @apply bg-background text-foreground;
   }
-}
-
-/* Custom logical colors for health bands */
-:root {
-  --color-healthy: 142 76% 36%;
-  --color-at-risk: 45 93% 47%;
-  --color-degrading: 24 94% 50%;
-  --color-critical: 0 84% 60%;
 }

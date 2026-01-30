@@ -13,12 +13,27 @@ interface PredictionPanelProps {
   isLoading?: boolean
 }
 
+import { cn } from '@/lib/utils'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  ArrowUp01Icon,
+  ArrowDown01Icon,
+  ZapIcon,
+  Idea01Icon,
+} from '@hugeicons/core-free-icons'
+
 export function PredictionPanel({
   predictions,
   isLoading = false,
 }: PredictionPanelProps) {
   if (isLoading) {
-    return <div className="h-64 bg-muted/20 animate-pulse rounded-xl" />
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-64 bg-muted/20 animate-pulse rounded-2xl" />
+        ))}
+      </div>
+    )
   }
 
   return (
@@ -27,28 +42,28 @@ export function PredictionPanel({
         const riskConfig = RISK_LEVEL_CONFIG[prediction.riskLevel]
         const isPositive = prediction.scoreDelta >= 0
 
-        // Map risk to semantic colors
-        let borderColor = ''
-        if (prediction.riskLevel === 'critical')
-          borderColor = 'border-destructive'
-        else if (prediction.riskLevel === 'high')
-          borderColor = 'border-destructive/70'
-        else if (prediction.riskLevel === 'medium')
-          borderColor = 'border-amber-500'
-
         return (
-          <Card key={prediction.id} className={`${borderColor} h-full`}>
-            <CardHeader className="pb-2">
+          <Card
+            key={prediction.id}
+            className="relative group transition-all duration-300 hover:shadow-xl border-muted/50 rounded-2xl overflow-hidden flex flex-col h-full bg-linear-to-br from-background to-muted/10"
+          >
+            <div
+              className="absolute top-0 left-0 right-0 h-1"
+              style={{ backgroundColor: riskConfig.color }}
+            />
+
+            <CardHeader className="pb-3 pt-6">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/80 bg-muted/50 px-2 py-0.5 rounded-full">
                   {PREDICTION_WINDOW_LABELS[prediction.predictionWindow]}
-                </CardTitle>
+                </span>
                 <Badge
                   variant="outline"
-                  className="font-normal capitalize"
+                  className="font-bold text-[9px] uppercase tracking-widest px-2 py-0"
                   style={{
                     color: riskConfig.color,
                     borderColor: `${riskConfig.color}40`,
+                    backgroundColor: `${riskConfig.color}10`,
                   }}
                 >
                   {riskConfig.label} Risk
@@ -56,31 +71,62 @@ export function PredictionPanel({
               </div>
             </CardHeader>
 
-            <CardContent className="space-y-4 pt-2">
-              <div className="flex items-baseline gap-3">
-                <span className="text-4xl font-bold tracking-tighter">
+            <CardContent className="space-y-6 flex-1 flex flex-col pt-0">
+              <div className="flex items-center gap-4">
+                <div className="text-5xl font-black tracking-tighter group-hover:scale-105 transition-transform">
                   {prediction.predictedScore}
-                </span>
-                <span
-                  className={`text-sm font-medium flex items-center ${isPositive ? 'text-emerald-500' : 'text-destructive'}`}
+                </div>
+                <div
+                  className={cn(
+                    'flex flex-col items-start gap-0.5 px-3 py-1.5 rounded-xl border font-bold text-xs',
+                    isPositive
+                      ? 'text-emerald-500 bg-emerald-500/5 border-emerald-500/20'
+                      : 'text-destructive bg-destructive/5 border-destructive/20'
+                  )}
                 >
-                  {isPositive ? '↑' : '↓'} {Math.abs(prediction.scoreDelta)} pts
-                </span>
+                  <div className="flex items-center gap-1">
+                    <HugeiconsIcon
+                      icon={isPositive ? ArrowUp01Icon : ArrowDown01Icon}
+                      className="size-3"
+                      strokeWidth={3}
+                    />
+                    <span>{Math.abs(prediction.scoreDelta)} pts</span>
+                  </div>
+                  <span className="text-[8px] uppercase tracking-wider opacity-70">
+                    Shift
+                  </span>
+                </div>
               </div>
 
-              <div className="space-y-3 pt-2">
-                <div>
-                  <h5 className="text-xs font-semibold text-muted-foreground uppercase mb-1">
-                    Primary Factor
-                  </h5>
-                  <p className="text-sm leading-snug">{prediction.causes[0]}</p>
+              <div className="space-y-4 flex-1">
+                <div className="space-y-2 p-3 rounded-xl bg-background/50 border border-white/5 shadow-inner">
+                  <div className="flex items-center gap-2">
+                    <HugeiconsIcon
+                      icon={ZapIcon}
+                      className="size-3 text-primary"
+                      strokeWidth={3}
+                    />
+                    <h5 className="text-[9px] font-black tracking-widest uppercase text-muted-foreground">
+                      Primary Vector
+                    </h5>
+                  </div>
+                  <p className="text-xs font-semibold leading-relaxed tracking-tight">
+                    {prediction.causes[0]}
+                  </p>
                 </div>
 
-                <div>
-                  <h5 className="text-xs font-semibold text-muted-foreground uppercase mb-1">
-                    Recommendation
-                  </h5>
-                  <p className="text-sm leading-snug">
+                <div className="space-y-2 p-3 rounded-xl bg-primary/5 border border-primary/10 shadow-inner">
+                  <div className="flex items-center gap-2">
+                    <HugeiconsIcon
+                      icon={Idea01Icon}
+                      className="size-3 text-amber-500"
+                      strokeWidth={3}
+                    />
+                    <h5 className="text-[9px] font-black tracking-widest uppercase text-muted-foreground">
+                      Recommedation
+                    </h5>
+                  </div>
+                  <p className="text-xs font-semibold leading-relaxed tracking-tight text-foreground/80">
                     {prediction.recommendations[0]}
                   </p>
                 </div>

@@ -42,6 +42,7 @@ export function ReportForm() {
   } = useForm<ReportFormData>({
     resolver: zodResolver(ReportFormSchema),
     defaultValues: {
+      lakeId: '',
       location: { latitude: 24.5854, longitude: 73.7125 }, // Default to Udaipur
     },
   })
@@ -108,8 +109,10 @@ export function ReportForm() {
       <div className="space-y-2">
         <Label>Select Affected Lake</Label>
         <Select
-          onValueChange={(val) => setValue('lakeId', val)}
-          defaultValue={watch('lakeId')}
+          onValueChange={(val) => {
+            if (val) setValue('lakeId', val)
+          }}
+          value={watch('lakeId')}
         >
           <SelectTrigger className="w-full h-12 bg-card border-muted">
             <SelectValue placeholder="Which lake is this near?" />
